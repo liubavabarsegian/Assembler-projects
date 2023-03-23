@@ -1,0 +1,233 @@
+     1                                  %include "../lib64.asm"
+     2                              <1>          section .text     ; сегмент кода
+     3                              <1> IntToStr64: 
+     4 00000000 57                  <1>          push   rdi
+     5 00000001 53                  <1>          push   rbx
+     6 00000002 52                  <1>          push   rdx
+     7 00000003 51                  <1>          push   rcx
+     8 00000004 56                  <1> 		 push   rsi
+     9 00000005 C60600              <1> 		 mov    byte[rsi],0 ; на место знака
+    10 00000008 83F800              <1>          cmp    eax,0
+    11 0000000B 7D05                <1>          jge    .l1
+    12 0000000D F7D8                <1>          neg    eax
+    13 0000000F C6062D              <1>          mov    byte[rsi],'-'
+    14 00000012 C646060A            <1> .l1      mov    byte[rsi+6],10
+    15 00000016 BF05000000          <1>          mov    rdi,5
+    16 0000001B 66BB0A00            <1>          mov    bx,10
+    17 0000001F 6699                <1> .again:  cwd           ; расширили слово до двойного
+    18 00000021 66F7F3              <1>          div    bx     ; делим результат на 10
+    19 00000024 80C230              <1>          add    dl,30h ; получаем из остатка код цифры
+    20 00000027 88143E              <1>          mov    [rsi+rdi],dl ; пишем символ в строку
+    21 0000002A 48FFCF              <1>          dec    rdi    ; переводим указатель на  
+    22                              <1>                        ; предыдущую позицию
+    23 0000002D 6683F800            <1>          cmp    ax, 0  ; преобразовали все число?
+    24 00000031 75EC                <1>          jne    .again
+    25 00000033 B906000000          <1>          mov    rcx, 6
+    26 00000038 4829F9              <1>          sub    rcx, rdi ; длина результата+знак
+    27 0000003B 4889C8              <1> 		 mov    rax,rcx
+    28 0000003E 48FFC0              <1> 		 inc    rax    ; длина результата+OA
+    29 00000041 48FFC6              <1>          inc    rsi    ; пропускаем знак
+    30 00000044 56                  <1> 		 push   rsi
+    31 00000045 488D343E            <1>          lea    rsi,[rsi+rdi] ; начало результата
+    32 00000049 5F                  <1> 		 pop    rdi
+    33 0000004A F3A4                <1>          rep movsb
+    34 0000004C 5E                  <1>          pop    rsi  
+    35 0000004D 59                  <1>          pop    rcx
+    36 0000004E 5A                  <1>          pop    rdx
+    37 0000004F 5B                  <1>          pop    rbx
+    38 00000050 5F                  <1>          pop    rdi
+    39 00000051 C3                  <1>          ret
+    40                              <1> StrToInt64:
+    41 00000052 57                  <1>          push   rdi
+    42 00000053 B739                <1>          mov    bh, '9'
+    43 00000055 B330                <1>          mov    bl, '0'
+    44 00000057 56                  <1>          push   rsi     ; сохраняем адрес исходной строки
+    45 00000058 803E2D              <1>          cmp    byte[rsi], '-'
+    46 0000005B 7503                <1>          jne    .prod
+    47 0000005D 48FFC6              <1>          inc    rsi     ; пропускаем знак
+    48 00000060 FC                  <1> .prod    cld
+    49 00000061 6631FF              <1>          xor    di, di  ; обнуляем будущее число
+    50 00000064 AC                  <1> .cycle:  lodsb          ; загружаем символ (цифру)
+    51 00000065 3C0A                <1>          cmp    al, 10  ; если 10, то на конец
+    52 00000067 741F                <1>          je     .Return
+    53 00000069 38D8                <1>          cmp    al, bl  ; сравниваем с кодом нуля
+    54 0000006B 722F                <1>          jb     .Error  ; "ниже" – Ошибка
+    55 0000006D 38F8                <1>          cmp    al, bh  ; сравниваем с кодом девяти 
+    56 0000006F 772B                <1>          ja     .Error  ; "выше" – Ошибка
+    57 00000071 2C30                <1>          sub    al, 30h ; получаем цифру из символа
+    58 00000073 6698                <1>          cbw            ; расширяем до слова
+    59 00000075 6650                <1>          push   ax      ; сохраняем в стеке
+    60 00000077 66B80A00            <1>          mov    ax, 10  ; заносим 10 в AX
+    61 0000007B 66F7E7              <1>          mul    di      ; умножаем, результат в DX:AX
+    62 0000007E 665F                <1>          pop    di      ; в DI – очередная цифра
+    63 00000080 6601F8              <1>          add    ax, di
+    64 00000083 6689C7              <1>          mov    di, ax  ; в DI – накопленное число        
+    65 00000086 EBDC                <1>          jmp    .cycle
+    66 00000088 5E                  <1> .Return: pop    rsi
+    67 00000089 BB00000000          <1>          mov    rbx, 0
+    68 0000008E 803E2D              <1>          cmp    byte[rsi], '-'
+    69 00000091 7503                <1>          jne    .J
+    70 00000093 66F7DF              <1>          neg    di
+    71 00000096 6689F8              <1> .J       mov    ax, di
+    72 00000099 98                  <1>          cwde
+    73 0000009A EB0B                <1>          jmp    .R
+    74 0000009C 5E                  <1> .Error:  pop    rsi
+    75 0000009D B800000000          <1>          mov    rax, 0
+    76 000000A2 BB01000000          <1>          mov    rbx, 1
+    77 000000A7 5F                  <1> .R       pop    rdi
+    78 000000A8 C3                  <1>          ret
+     2                                  
+     3                                  section .data
+     4 00000000 496E70757420323820-         InputText db "Input 28 elements by ENTER", 10, 13;
+     4 00000009 656C656D656E747320-
+     4 00000012 627920454E5445520A-
+     4 0000001B 0D                 
+     5                                      TextLen equ $-InputText;
+     6                                      
+     7 0000001C 526573756C743A000A-         OutputText dw "Result:", 10, 13
+     7 00000025 000D00             
+     8                                      OutputLen equ $-OutputText
+     9                                  
+    10 00000028 1C                          array_size db 28
+    11                                  
+    12                                  section .bss
+    13 00000000 <res 70h>                   array resd 28
+    14 00000070 <res 70h>                   new_array resd 28
+    15 000000E0 ????????                    Input_buf resd 1
+    16 000000E4 ????????                    buf_len resd 1
+    17                                  section .text
+    18                                  
+    19                                  global _start
+    20                                  
+    21                                  
+    22                                  read_cycle:
+    23 000000A9 3B2C25[28000000]            cmp ebp, [array_size]
+    24 000000B0 0F8404010000                    je return
+    25 000000B6 B800000000                  mov eax, 0; read
+    26 000000BB BF00000000                  mov edi, 0; stdin=0
+    27 000000C0 BE[E0000000]                mov esi, Input_buf; Р°РґСЂРµСЃ РІРІРѕРґРёРјРѕР№ СЃС‚СЂРѕРєРё
+    28 000000C5 BA0A000000                  mov edx, 10; buf len
+    29 000000CA 0F05                        syscall
+    30                                      
+    31 000000CC BE[E0000000]                mov esi, Input_buf
+    32 000000D1 E87CFFFFFF                  call StrToInt64
+    33 000000D6 678904AD[00000000]          mov [array + ebp * 4], eax  
+    34                                      
+    35 000000DE FFC5                        inc ebp
+    36 000000E0 E2C7                        loop read_cycle
+    37 000000E2 C3                          ret
+    38                                  
+    39                                  
+    40                                  write_cycle:
+    41 000000E3 3B2C25[28000000]            cmp ebp, [array_size]
+    42 000000EA 0F84CA000000                    je return
+    43 000000F0 BE[E0000000]                mov esi, Input_buf
+    44 000000F5 678B04AD[70000000]          mov eax, [new_array + ebp * 4]
+    45 000000FD E8FEFEFFFF                  call IntToStr64
+    46                                      
+    47 00000102 B801000000                  mov eax, 1;write
+    48 00000107 BF01000000                  mov edi, 1;stdout=1
+    49 0000010C BE[E0000000]                mov esi, Input_buf 
+    50 00000111 BA04000000                  mov edx, 4 ; РґР»РёРЅР° СЃС‚СЂРѕРєРё
+    51 00000116 0F05                        syscall 
+    52                                      
+    53 00000118 FFC5                        inc ebp
+    54 0000011A E2C7                        loop write_cycle
+    55 0000011C C3                          ret
+    56                                  
+    57                                  
+    58                                  modify:   
+    59 0000011D BD00000000                  mov ebp, 0
+    60 00000122 BA00000000                  mov edx, 0
+    61 00000127 E815000000                  call negative
+    62 0000012C BD00000000                  mov ebp, 0
+    63 00000131 E826000000                  call positive
+    64 00000136 BD00000000                  mov ebp, 0
+    65 0000013B E837000000                  call zero
+    66 00000140 C3                          ret
+    67                                  
+    68                                  
+    69                                  negative:
+    70 00000141 3B2C25[28000000]            cmp ebp, [array_size]
+    71 00000148 7470                            je return
+    72 0000014A 678B04AD[00000000]          mov eax, [array + ebp * 4]
+    73 00000152 83F800                      cmp eax, 0
+    74 00000155 7C4E                            jl call_write_neg
+    75                                      after_write_neg:
+    76 00000157 FFC5                            inc ebp
+    77 00000159 E2E6                            loop negative
+    78 0000015B C3                              ret
+    79                                  
+    80                                  positive:
+    81 0000015C 3B2C25[28000000]            cmp ebp, [array_size]
+    82 00000163 7455                            je return
+    83 00000165 678B04AD[00000000]          mov eax, [array + ebp * 4]
+    84 0000016D 83F800                      cmp eax, 0
+    85 00000170 7F3A                            jg call_write_pos
+    86                                      after_write_pos:
+    87 00000172 FFC5                            inc ebp
+    88 00000174 E2E6                            loop positive
+    89 00000176 C3                              ret
+    90                                  
+    91                                  zero:
+    92 00000177 3B2C25[28000000]            cmp ebp, [array_size]
+    93 0000017E 743A                            je return
+    94 00000180 678B04AD[00000000]          mov eax, [array + ebp * 4]
+    95 00000188 83F800                      cmp eax, 0
+    96 0000018B 7426                            je call_write_zero
+    97                                      after_write_zero:
+    98 0000018D FFC5                            inc ebp
+    99 0000018F E2E6                            loop zero
+   100 00000191 C3                              ret
+   101                                  write:
+   102 00000192 678B04AD[00000000]          mov eax, [array + ebp * 4]
+   103 0000019A 67890495[70000000]          mov [new_array + edx * 4], eax
+   104 000001A2 FFC2                        inc edx
+   105 000001A4 C3                          ret
+   106                                  
+   107                                  call_write_neg:
+   108 000001A5 E8E8FFFFFF                  call write
+   109 000001AA EBAB                        jmp after_write_neg
+   110                                  
+   111                                  call_write_pos:
+   112 000001AC E8E1FFFFFF                  call write
+   113 000001B1 EBBF                        jmp after_write_pos
+   114                                  
+   115                                  call_write_zero:
+   116 000001B3 E8DAFFFFFF                  call write
+   117 000001B8 EBD3                        jmp after_write_zero
+   118                                  
+   119                                  return:
+   120 000001BA C3                          ret
+   121                                  _start:
+   122                                      ;input text:
+   123 000001BB B801000000                  mov eax, 1; write
+   124 000001C0 BF01000000                  mov edi, 1; stdout = 1
+   125 000001C5 BE[00000000]                mov esi, InputText
+   126 000001CA BA1C000000                  mov edx, TextLen
+   127 000001CF 0F05                        syscall
+   128                                      
+   129 000001D1 BD00000000                  mov ebp, 0
+   130 000001D6 8B0C25[28000000]            mov ecx, [array_size]
+   131 000001DD E8C7FEFFFF                  call read_cycle
+   132                                  
+   133 000001E2 8B0C25[28000000]            mov ecx, [array_size]
+   134 000001E9 E82FFFFFFF                  call modify
+   135                                  
+   136                                  
+   137                                      ;output text:
+   138 000001EE B801000000                  mov eax, 1; write
+   139 000001F3 BF01000000                  mov edi, 1; stdout = 1
+   140 000001F8 BE[1C000000]                mov esi, OutputText
+   141 000001FD BA0C000000                  mov edx, OutputLen
+   142 00000202 0F05                        syscall
+   143                                  
+   144 00000204 BD00000000                  mov ebp, 0
+   145 00000209 8B0C25[28000000]            mov ecx, [array_size]
+   146 00000210 E8CEFEFFFF                  call write_cycle
+   147 00000215 EB00                        jmp exit
+   148                                  
+   149                                  exit:
+   150 00000217 B83C000000                  mov rax, 60;
+   151 0000021C 4831FF                      xor rdi, rdi; return code 0
+   152 0000021F 0F05                        syscall

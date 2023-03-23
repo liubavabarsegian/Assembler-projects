@@ -7,11 +7,11 @@ section .data
     OutputText dw "Result:", 10, 13
     OutputLen equ $-OutputText
 
-    array_size db 5
-    ; space dw 10, 32, 13
+    array_size db 28
+
 section .bss
-    array resd 5
-    new_array resd 5
+    array resd 28
+    new_array resd 28
     Input_buf resd 1
     buf_len resd 1
 section .text
@@ -61,6 +61,8 @@ modify:
     call negative
     mov ebp, 0
     call positive
+    mov ebp, 0
+    call zero
     ret
 
 
