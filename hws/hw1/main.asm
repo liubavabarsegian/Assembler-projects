@@ -83,6 +83,11 @@ print_number_of_not_vowels:
     mov esi, number_of_not_vowels 
     mov edx, 3 ; длина строки
     syscall 
+    mov eax, 1;write
+    mov edi, 1;stdout=1
+    mov esi, enter_key 
+    mov edx, 3 ; длина строки
+    syscall 
     pop rdi
     mov edx, 0 
     jmp after_cmp
@@ -101,8 +106,13 @@ print_number_of_vowels:
     mov eax, 1;write
     mov edi, 1;stdout=1
     mov esi, number_of_vowels 
-    mov edx, 3 ; длина строки
+    mov edx, 4 ; длина строки
     syscall 
+    mov eax, 1;write
+    mov edi, 1;stdout=1
+    mov esi, enter_key 
+    mov edx, 3 ; длина строки
+    syscall     
     jmp exit
 
 is_vowel:
