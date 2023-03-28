@@ -14,6 +14,7 @@ section .bss
     new_array resd 28
     Input_buf resd 1
     buf_len resd 1
+    output_buf resd 1
 section .text
 
 global _start
@@ -44,10 +45,10 @@ write_cycle:
     mov eax, [new_array + ebp * 4]
     call IntToStr64
     
+    mov edx, eax ; длина строки
     mov eax, 1;write
     mov edi, 1;stdout=1
     mov esi, Input_buf 
-    mov edx, 4 ; длина строки
     syscall 
     
     inc ebp

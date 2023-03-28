@@ -78,41 +78,36 @@ print_number_of_not_vowels:
     mov eax, edx
     call IntToStr64
 
+    mov edx, eax ; длина строки
     mov eax, 1;write
     mov edi, 1;stdout=1
     mov esi, number_of_not_vowels 
-    mov edx, 3 ; длина строки
     syscall 
-    mov eax, 1;write
-    mov edi, 1;stdout=1
-    mov esi, enter_key 
-    mov edx, 3 ; длина строки
-    syscall 
+
     pop rdi
     mov edx, 0 
     jmp after_cmp
 
 print_number_of_vowels:
-    mov esi, number_of_vowels
-    mov eax, edi
-    call IntToStr64
-
+    push rdi
     mov eax, 1;write
     mov edi, 1;stdout=1
     mov esi, InText
     mov edx, InTextLen ; длина строки
     syscall
+    pop rdi
 
+    mov esi, number_of_vowels
+    mov eax, edi
+    call IntToStr64
+
+    mov edx, eax; длина строки
     mov eax, 1;write
     mov edi, 1;stdout=1
     mov esi, number_of_vowels 
-    mov edx, 4 ; длина строки
+    
     syscall 
-    mov eax, 1;write
-    mov edi, 1;stdout=1
-    mov esi, enter_key 
-    mov edx, 3 ; длина строки
-    syscall     
+    
     jmp exit
 
 is_vowel:

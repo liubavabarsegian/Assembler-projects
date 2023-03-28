@@ -67,6 +67,8 @@ _start:
     call StrToInt64
     mov [R], eax
     
+    cmp eax, 0
+        je exit
       ; write K
     mov rax, 1; системная функция 1 (write)
     mov rdi, 1; дескриптор файла stdout=1
@@ -189,7 +191,7 @@ continue:
     mov rdx, 5 ; длина строки
     ; вызов системной функции
     syscall    
-    
+exit: 
     mov rax, 60; системная функция 60 (exit)
     xor rdi, rdi; return code 0
     syscall
