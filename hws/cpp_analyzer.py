@@ -45,13 +45,15 @@ def tokens(string):
 
 def check_string(token):
     global answer
-    if (token):
+    if (len(token) > 0):
         if token[0:2] == '@@' and token[-1] == ';':
             check_string(token[2:])
-        elif token[0:4] == "S V{":
+        elif len(token) > 4 and token[0:4] == "S V{":
             i = 1
-            while token[-i] != '}':
+            while i < len(token) and token[-i] != '}':
                 i += 1
+            if token[-i] != '}':
+                return
             while token[-i] == 'V' and token[-i-1] == ',':
                 i += 2
             check_string(token[4:(len(token) - i)])
