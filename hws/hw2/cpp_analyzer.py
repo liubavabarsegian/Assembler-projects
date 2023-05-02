@@ -45,6 +45,8 @@ def tokens(string):
 
 def check_string(token):
     global answer
+    if token.count('{') != token.count('}'):
+        return
     if (len(token) > 0):
         if token[0:2] == '@@' and token[-1] == ';':
             check_string(token[2:])
@@ -52,7 +54,7 @@ def check_string(token):
             i = 1
             while i < len(token) and token[-i] != '}':
                 i += 1
-            if token[-i] != '}':
+            if token[-i] != '}' or i == 1:
                 return
             while token[-i] == 'V' and token[-i-1] == ',':
                 i += 2
