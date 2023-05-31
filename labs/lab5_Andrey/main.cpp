@@ -10,7 +10,6 @@ extern "C" void FIND_SUBSTRINGS(char *str1, char *str2, char *substr, int *n, in
 
 void print_substring(char *str1, char *buffer, int *n, int *i)
 {
-    printf("AA %d\n", *n);
     strcpy(buffer, "");
     strncpy(buffer, str1 + *i, *n);
     *i += *n;
