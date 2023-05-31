@@ -1,14 +1,20 @@
 global FIND_SUBSTRINGS
+extern _Z15print_substringPcS_PiS0_
 
-.text
+section .text
 
 FIND_SUBSTRINGS:
     ;пролог
     push RBP
     mov RBP,RSP
 
+     mov r9,rsi
+     mov r10, rdi
+     push r9
+     push r10
+
     ;[rcx] - n
-    ;r8 - i
+    ;[r8] - i
     ;rdi - str1 /
     ;rsi - str2
     ;rdx - buffer
@@ -16,7 +22,7 @@ FIND_SUBSTRINGS:
     mov r9, rcx
     push rcx
 
-    mov rax, r8
+    mov rax, [r8]
     add rax, rdi
     mov rdi, rax
 
@@ -43,7 +49,7 @@ FIND_SUBSTRINGS:
 
             loop loop1
 substr:
-    inc word[r9]
+    inc qword[r9]
 
     cmpsb
     jne exit
@@ -51,8 +57,23 @@ substr:
 
     ;эпилог
 exit:
+    mov rax, r9
+
+    ;[rcx] - i
     pop rcx
-    mov rcx, r9
+    mov rcx, r8
+
+    ;rsi - buffer
+    mov rsi, rdx
+
+    pop r9
+    ;rdi - str1
+    mov rdi, r9
+    pop r10
+
+    mov rdx, rax
+
+    call _Z15print_substringPcS_PiS0_
     mov rsp, rbp
     pop rbp
     ret

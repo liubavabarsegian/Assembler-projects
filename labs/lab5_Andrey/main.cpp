@@ -4,10 +4,21 @@
 #include <stdlib.h>
 using namespace std;
 
-//abcdty
-//babcd
+void print_substring(char *str1, char *buffer, int *n, int *i);
 
-extern "C" void FIND_SUBSTRINGS(char *str1, char *str2, char *substr, int *n, int i);
+extern "C" void FIND_SUBSTRINGS(char *str1, char *str2, char *substr, int *n, int *i);
+
+void print_substring(char *str1, char *buffer, int *n, int *i)
+{
+    printf("AA %d\n", *n);
+    strcpy(buffer, "");
+    strncpy(buffer, str1 + *i, *n);
+    *i += *n;
+    if (*n == 0) {*i += 1;}
+    if (*n > 1)
+        printf("%s\n", buffer);
+}
+
 int main()
 {
     char str1[255] = "", str2[255] = "", buffer[255] ="";
@@ -21,13 +32,7 @@ int main()
     while (str1[i])
     {
         int n = 0;
-        FIND_SUBSTRINGS(str1, str2, buffer, &n, i);
-        strcpy(buffer, "");
-        strncpy(buffer, str1 + i, n);
-        i += n;
-        if (n == 0) {i += 1;}
-        if (n > 1)
-            printf("%s\n", buffer);
+        FIND_SUBSTRINGS(str1, str2, buffer, &n, &i);
     }
     return 0;
 }
